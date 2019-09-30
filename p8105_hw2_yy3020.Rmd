@@ -1,0 +1,123 @@
+---
+title: "p8105_hw2_yy3020"
+author: "YuaoYang"
+date: "2019/9/25"
+output: github_document
+---
+
+```{r }
+library(readxl)
+library(tidyverse)
+trash_data = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "Mr. Trash Wheel", col_names = TRUE) %>%
+janitor::clean_names() %>%
+  select(-x15) %>%
+  drop_na() %>%
+  mutate(sports_balls = round(sports_balls, 0),
+         sports_balls = as.integer(sports_balls)) 
+```
+
+
+```{r}
+pp_2017 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2017 Precipitation", skip = 1) %>%
+  drop_na() 
+pp_2018 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2018 Precipitation", skip = 1) %>%
+  drop_na() 
+new_pp = bind_rows(pp_2017, pp_2018) %>%
+  mutate(month.name = as.character(Month))  #use which join?? what is combine
+```
+
+the number of observations in trash_data is (`r  `) and in new_pp is (`r `). The total precipitation in 2018 is (`r sum(pull(pp_2018,Total)) `）。the median number of sports balls in a dumpster in 2017 is (`r filter(trash_data, year == 2017) %>% pull(sports_balls) %>% median `).
+
+#Problem 2
+```{r}
+pols_month = read_csv("./data/pols-month.csv") %>%
+  janitor::clean_names() %>%
+   separate(mon, into = c("year", "month","day")) %>%
+  mutate(year = as.integer(year),
+         month = as.integer(month),
+         day = as.integer(day)) %>%
+  pivot_longer(c(prez_gop, prez_dem),
+               names_to = "president",
+               names_prefix = "prez_"
+               ) %>%
+select(-day)
+ 
+
+  
+```
+
+```{r}
+snp = read_csv("./data/snp.csv") %>%
+  janitor::clean_names() %>%
+   separate(date, into = c("month", "day","year")) %>%
+  mutate(year = as.integer(year),
+         month = as.integer(month)) %>%
+           arrange(year,month) %>%
+  select(year, month, close)
+ 
+```
+
+````{r}
+unemplo = read_csv("./data/unemployment.csv") %>%
+  janitor::clean_names() %>%
+ transmute("year" = year,
+          "1" = jan, 
+           "2" = feb,
+           "3" = mar,
+           "4" = apr,
+           "5" = may,
+           "6" = jun,
+           "7" = jul,
+           "8" = aug,
+           "9" = sep,
+           "10" = oct,
+           "11" = nov,
+           "12" = dec) %>%
+  pivot_longer(2:13,
+               names_to = "month",
+               values_to = "unemplyment") %>%
+   mutate(year = as.integer(year),
+         month = as.integer(month))
+
+snp_pols = full_join(snp, pols_month, by = c("year", "month"))
+snp_pols_unem = full_join(snp_pols, unemplo, by = c("year", "month"))
+
+```
+
+#problem 3
+```{r}
+baby_name = read_csv("./data/Popular_Baby_Names.csv") %>%
+  janitor::clean_names() %>%
+  mutate(childs_first_name = str_to_title(childs_first_name),
+         gender = str_to_lower(gender),
+         ethnicity = recode(str_to_lower(ethnicity),
+                            "asian and paci" = "asian and pacific islander",
+                            "black non hisp" = "black non hispanic",
+                            "white non hisp" = "white non hispanic" ) ) %>%
+  distinct() %>%
+  rename(
+    birth_year = year_of_birth,
+    race = ethnicity,
+    first_name = childs_first_name
+  )
+         #左边等于右边？？ 哪边算是新的量
+  
+```
+
+```{r}
+olivia <- filter(baby_name, first_name == "olivia", gender == "female") %>%
+  pivot_wider(id_cols = "race",
+              names_from = "birth_year",
+              values_from = "rank")
+
+olivia <- filter(baby_name, first_name == "olivia", gender == "female") %>%
+  pivot_wider(id_cols = "race",
+              names_from = "birth_year",
+              values_from = "count")
+
+```
+
+```{r}
+wnh_male = filter(baby_name, gender == "male", race == "white non hispanic", birth_year == "2016")
+ggplot(wnh_male, aes(x = rank, y = count)) +geom_point()
+```
