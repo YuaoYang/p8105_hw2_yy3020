@@ -8,7 +8,7 @@ output: github_document
 ```{r }
 library(readxl)
 library(tidyverse)
-trash_data = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "Mr. Trash Wheel", col_names = TRUE) %>%
+trash_data = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", col_names = TRUE) %>%
 janitor::clean_names() %>%
   select(-x15) %>%
   drop_na() %>%
@@ -18,9 +18,9 @@ janitor::clean_names() %>%
 
 
 ```{r}
-pp_2017 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2017 Precipitation", skip = 1) %>%
+pp_2017 = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2017 Precipitation", skip = 1) %>%
   drop_na() 
-pp_2018 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2018 Precipitation", skip = 1) %>%
+pp_2018 = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2018 Precipitation", skip = 1) %>%
   drop_na() 
 new_pp = bind_rows(pp_2017, pp_2018) %>%
   mutate(month.name = as.character(Month))  #use which join?? what is combine
