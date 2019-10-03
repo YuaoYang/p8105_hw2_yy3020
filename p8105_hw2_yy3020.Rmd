@@ -10,23 +10,39 @@ library(readxl)
 library(tidyverse)
 trash_data = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", col_names = TRUE) %>%
 janitor::clean_names() %>%
-  select(-x15) %>%
+  select(1:14) %>%
   drop_na() %>%
   mutate(sports_balls = round(sports_balls, 0),
          sports_balls = as.integer(sports_balls)) 
+
 ```
 
 
 ```{r}
 pp_2017 = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2017 Precipitation", skip = 1) %>%
-  drop_na() 
+   janitor::clean_names() %>% 
+  drop_na() %>%
+  mutate('year'=2017) %>% 
+  mutate(month = month.name[month]) %>%
+  select(year, everything())
+
 pp_2018 = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2018 Precipitation", skip = 1) %>%
-  drop_na() 
-new_pp = bind_rows(pp_2017, pp_2018) %>%
-  mutate(month.name = as.character(Month))  #use which join?? what is combine
+   janitor::clean_names() %>% 
+  drop_na()  %>%
+  mutate('year'=2018) %>% 
+  mutate(month = month.name[month]) %>% 
+  select(year,everything())
+
+new_pp = rbind(pp_2017, pp_2018) 
+
 ```
 
-the number of observations in trash_data is (`r  `) and in new_pp is (`r `). The total precipitation in 2018 is (`r sum(pull(pp_2018,Total)) `）。the median number of sports balls in a dumpster in 2017 is (`r filter(trash_data, year == 2017) %>% pull(sports_balls) %>% median `).
+the number of observations in trash_data is (`r nrow(trash_data) `) and in new_pp is (`r nrow(new_pp)`). The key variables are shown below. The total precipitation in 2018 is (`r sum(pull(pp_2018,total)) `)。the median number of sports balls in a dumpster in 2017 is (`r filter(trash_data, year == 2017) %>% pull(sports_balls) %>% median `). 
+
+```{r}
+head(trash_data)
+head(new_pp)
+```
 
 #Problem 2
 ```{r}
@@ -83,6 +99,10 @@ snp_pols = full_join(snp, pols_month, by = c("year", "month"))
 snp_pols_unem = full_join(snp_pols, unemplo, by = c("year", "month"))
 
 ```
+```{r}
+range_year = range(pull(snp_pols_unem,year))
+```
+#From these datasets pols_month,  we can find that there are there are so many variables like  (`r colnames(pols_month) `). From snp, we can find there are (`r colnames(snp) `). From umemplo, we can find there are (`r colnames(unemplo) `). The dimension of resulting dateset snp_pols_unem is (`r nrow(snp_pols_unem) `, `r ncol(snp_pols_unem)`). The range is (`r range_year[2] - range_year[1]` ).
 
 #problem 3
 ```{r}
@@ -100,20 +120,29 @@ baby_name = read_csv("./data/Popular_Baby_Names.csv") %>%
     race = ethnicity,
     first_name = childs_first_name
   )
-         #左边等于右边？？ 哪边算是新的量
+         
   
 ```
 
 ```{r}
-olivia <- filter(baby_name, first_name == "olivia", gender == "female") %>%
+olivia <- filter(baby_name, first_name == "Olivia", gender == "female") %>%
   pivot_wider(id_cols = "race",
               names_from = "birth_year",
               values_from = "rank")
+ovila2 <- filter(baby_name, first_name == "Olivia", gender == "female") %>%
+  pivot_wider(id_cols = "birth_year",
+              names_from = "race",
+              values_from = "rank")
 
-olivia <- filter(baby_name, first_name == "olivia", gender == "female") %>%
-  pivot_wider(id_cols = "race",
-              names_from = "birth_year",
-              values_from = "count")
+most_popular_male_names <- filter(baby_name, gender == "male") %>% 
+  group_by(birth_year,race) %>% 
+  slice(which.min(rank)) %>%
+  select(c(1,3,4))%>%
+  pivot_wider(
+            id_cols = "race",
+            names_from = "birth_year",
+            values_from = "first_name")
+
 
 ```
 
