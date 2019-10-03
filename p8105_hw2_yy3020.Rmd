@@ -8,6 +8,10 @@ output: github_document
 ```{r }
 library(readxl)
 library(tidyverse)
+```
+
+```{r}
+#clear the trash_data
 trash_data = read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", col_names = TRUE) %>%
 janitor::clean_names() %>%
   select(1:14) %>%
@@ -37,12 +41,8 @@ new_pp = rbind(pp_2017, pp_2018)
 
 ```
 
-the number of observations in trash_data is (`r nrow(trash_data) `) and in new_pp is (`r nrow(new_pp)`). The key variables are shown below. The total precipitation in 2018 is (`r sum(pull(pp_2018,total)) `)。the median number of sports balls in a dumpster in 2017 is (`r filter(trash_data, year == 2017) %>% pull(sports_balls) %>% median `). 
+the number of observations in trash_data is (`r nrow(trash_data) `) and in new_pp is (`r nrow(new_pp)`). The key variables are(`r colnames(trash_data[5:14])`) in trash_data, and the key variables are (`r colnames(new_pp)`).The total precipitation in 2018 is (`r sum(pull(pp_2018,total)) `)。the median number of sports balls in a dumpster in 2017 is (`r filter(trash_data, year == 2017) %>% pull(sports_balls) %>% median `). 
 
-```{r}
-head(trash_data)
-head(new_pp)
-```
 
 #Problem 2
 ```{r}
@@ -102,7 +102,8 @@ snp_pols_unem = full_join(snp_pols, unemplo, by = c("year", "month"))
 ```{r}
 range_year = range(pull(snp_pols_unem,year))
 ```
-#From these datasets pols_month,  we can find that there are there are so many variables like  (`r colnames(pols_month) `). From snp, we can find there are (`r colnames(snp) `). From umemplo, we can find there are (`r colnames(unemplo) `). The dimension of resulting dateset snp_pols_unem is (`r nrow(snp_pols_unem) `, `r ncol(snp_pols_unem)`). The range is (`r range_year[2] - range_year[1]` ).
+
+From these datasets pols_month,  we can find that there are there are so many variables like  (`r colnames(pols_month) `). From snp, we can find there are (`r colnames(snp) `). From umemplo, we can find there are (`r colnames(unemplo) `). The dimension of resulting dateset snp_pols_unem is (`r nrow(snp_pols_unem) `, `r ncol(snp_pols_unem)`). The range is (`r range_year[2] - range_year[1]` ). The names of  key variables are (`r colnames(snp_pols_unem[3:12])`).
 
 #problem 3
 ```{r}
